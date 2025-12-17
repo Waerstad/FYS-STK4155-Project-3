@@ -1,21 +1,32 @@
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers, regularizers
+from _PDE_NN import _PDE_NN
 import numpy as np
+import tensorflow as tf
 
-class HeatEqNN(keras.Sequential):
-    def __init__(self, num_layers, layer_size, activation, reg_param, regularizer=None):
-        super().__init__()
-        if regularizer == "L1":
-            reg = regularizers.l1(reg_param)
-        elif regularizer == "L2":
-            reg = regularizers.l2(reg_param)
-        elif regularizer != None:
-            raise ValueError("Unsupported regularizer type. Use 'L1', 'L2', or None.")
-        self.add(layers.InputLayer(input_shape=(2,))) # Add input layer containing (x,y) coordinate of input point.
-        for _ in range(num_layers):
-            # Add hidden layers
-            self.add(layers.Dense(layer_size, activation=activation,
-                                  kernel_regularizer=reg,
-                                  bias_regularizer=reg))
-        self.add(layers.Dense(2, activation='linear')) # Output layer with 2 outputs (x,y)
+class HeatEqNN(_PDE_NN):
+
+    def _pde(self, inputs):
+        """
+        Custom loss function for solving the heat equation.
+        """  
+        x, t = tf.split(inputs, num_or_size_splits=2, axis=1)
+        with tf.GradientTape(persistent=True) as tape:
+            tape.watch([x, t])
+            raw_output = self._model(tf.concat([x, t], axis=1))
+            u = self._trial_solution(x, t, raw_output)
+        
+            u_x = tape.gradient(u, x)
+            u_t = tape.gradient(u, t)
+
+            u_xx = tape.gradient(u_x, x)
+        del tape 
+        pde = u_t - u_xx
+        return pde
+    
+    def _trial_solution(self, x, t, N):
+        """
+        Trial solution that satisfies initial and boundary conditions.
+        """
+        # Example trial solution: u(x,t) = (1-t)*I(x) + x*(1 - x)*t*N(x)
+        # where I(x) is the initial condition and N(x) is the neural net output
+        I = tf.sin(np.pi * x)  # Example initial condition
+        return (1-t)*I + x*(1-x)*t*N 
