@@ -17,7 +17,7 @@ class HeatEqSolver(object):
         self.time_step: float = time_step
         self.duration: float = duration
         self._num_space_points: int= len(initial_state)
-        self._num_time_steps: int = int(duration / time_step)
+        self._num_time_steps: int = round(duration / time_step)
 
     def solve(self) -> npt.NDArray[np.float64]:
         """
