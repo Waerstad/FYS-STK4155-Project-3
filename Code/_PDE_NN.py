@@ -20,8 +20,8 @@ class _PDE_NN(ABC):
         policy = tf.keras.mixed_precision.Policy("float64")
         tf.keras.mixed_precision.set_global_policy(policy)
 
-        self.input_size = 2 # number of nodes in input layer
-        self.output_size = 1 # number of nodes in output layer
+        self._set_input_size() # number of nodes in input layer
+        self._set_output_size() # number of nodes in output layer
 
         if regularizer == "L1":
             self.reg = regularizers.l1(reg_param)
@@ -67,6 +67,20 @@ class _PDE_NN(ABC):
         loss = tf.reduce_mean(tf.square(pde)) 
         return loss
     
+    @abstractmethod
+    def _set_input_size(self):
+        """
+        Sets the input size of the neural network.
+        """
+        self.input_size = None # number of nodes in input layer
+
+    @abstractmethod
+    def _set_output_size(self):
+        """
+        Sets the output size of the neural network.
+        """
+        self.output_size = None # number of nodes in output layer
+
     @abstractmethod
     def _pde(self, inputs):
         """

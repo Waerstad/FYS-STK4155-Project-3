@@ -4,6 +4,12 @@ import tensorflow as tf
 
 class HeatEqNN(_PDE_NN):
 
+    def _set_input_size(self):
+        self.input_size = 2 # number of nodes in input layer
+    
+    def _set_output_size(self):
+        self.output_size = 1 # number of nodes in output layer
+
     def _pde(self, inputs):
         """
         Custom loss function for solving the heat equation.
