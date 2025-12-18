@@ -8,7 +8,14 @@ class _PDE_NN(ABC):
     """
     Simple feedforward neural network to approximate solutions to the 1D heat equation
     """
-    def __init__(self, num_layers, layer_size, activation, optimizer = "adam", learning_rate = 0.001, reg_param = 0, regularizer=None):
+    def __init__(self, 
+                 num_layers,
+                 layer_size,
+                 activation,
+                 optimizer = "adam",
+                 learning_rate = 0.001,
+                 reg_param = 0,
+                 regularizer=None):
         super().__init__()
         policy = tf.keras.mixed_precision.Policy("float64")
         tf.keras.mixed_precision.set_global_policy(policy)
@@ -42,7 +49,7 @@ class _PDE_NN(ABC):
                                   bias_regularizer=self.reg)(input_layer)
         for _ in range(num_layers-1):
             # Add remaining hidden layers
-            layers.Dense(layer_size, activation=activation,
+            hidden_layer = layers.Dense(layer_size, activation=activation,
                         kernel_regularizer=self.reg,
                         bias_regularizer=self.reg)(hidden_layer)
         output_layer = layers.Dense(self.output_size, activation='linear')(hidden_layer) # Output layer
@@ -100,19 +107,21 @@ class _PDE_NN(ABC):
             self.optimizer.apply_gradients(zip(gradients, self._model.trainable_variables))
         return loss
 
-    def train(self, input_data, epochs=100):
+    def train(self, input_data, epochs=100, print_toggle=False):
         """
         Train the neural network on the provided data.
         """
         input_data = input_data.astype('float64')
         for i in range(epochs):
             loss = self._train_step(input_data)
-            print(f'Epoch {i+1}, Loss: {loss.numpy()}')
+            if print_toggle:
+                print(f'Epoch {i+1}, Loss: {loss.numpy()}')
 
     
     def test(self, input_data):
         """
-        Runs an evaluation of the model on provided test data.
+        Runs an evaluation of the model on provided test data by computing
+        and returning the loss.
         """  # Dummy target data as loss does not depend on it
         input_data = input_data.astype('float64')
         test_loss = self._loss(input_data)
