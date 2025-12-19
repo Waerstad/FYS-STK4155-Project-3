@@ -4,7 +4,7 @@ Project completed as part of FYS-STK4155 at the University of Oslo during the Au
 This repository contains the all the code used to create and examine a neural network used to solve PDE. In particular, we consider the heat equation. 
 
 #### Authors
-Simen Wærstad @Waerstad
+Simen Wærstad [@Waerstad](https://github.com/Waerstad)
 
 ### Requirements:
 
